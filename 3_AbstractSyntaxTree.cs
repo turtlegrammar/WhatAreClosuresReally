@@ -82,16 +82,6 @@ namespace Closures
         //    return sum;
         // }
         // loopSumTo(5); // 0 + 1 + 2 + 3 + 4 + 5 = 15
-        public static string LoopSumToCode = @"
-          (define loopSumTo 
-                  (lambda (x) 
-                     (define sum 0)
-                     (while (> x 0)
-                        (set! sum (+ sum x))
-                        (set! x (- x 1)))
-                      sum))
-          (loopSumTo 5)
-        ";
         public static Exp LoopSumTo = Sequence(
             Define(
                 "loopSumTo", 
@@ -112,17 +102,19 @@ namespace Closures
             ),
             FunctionCall(Symbol("loopSumTo"), Number(5))
         );
+        public static string LoopSumToCode = @"
+          (define loopSumTo 
+                  (lambda (x) 
+                     (define sum 0)
+                     (while (> x 0)
+                        (set! sum (+ sum x))
+                        (set! x (- x 1)))
+                      sum))
+          (loopSumTo 5)
+        ";
 
         // let recSumTo = x => 1 > x ? 0 : x + recSumTo(x - 1);
         // recSumTo(5);
-        public static string RecursiveSumToCode = @"
-          (define recSumTo
-                  (lambda (x) 
-                     (if (> 1 x) 
-                         0 
-                         (+ x (recSumTo (- x 1))))))
-          (recSumTo 5)
-        ";
         public static Exp RecursiveSumTo = Sequence(
             Define(
                 "recSumTo", 
@@ -144,22 +136,19 @@ namespace Closures
             ),
             FunctionCall(Symbol("recSumTo"), Number(5))
         );
+        public static string RecursiveSumToCode = @"
+          (define recSumTo
+                  (lambda (x) 
+                     (if (> 1 x) 
+                         0 
+                         (+ x (recSumTo (- x 1))))))
+          (recSumTo 5)
+        ";
 
         // let makeCounter = function() { let x = 0; return function() { x = x + 1; return x; }; }
         // let counter = makeCounter();
         // counter();
         // counter();
-        public static string CounterCode = @"
-          (define makeCounter
-                  (lambda ()
-                     (define x 0)
-                     (lambda ()
-                        (set! x (+ x 1))
-                        x)))
-           (define counter (makeCounter))
-           (counter)
-           (counter)
-        ";
         public static Exp Counter = Sequence(
             Define(
                 "makeCounter",
@@ -181,5 +170,16 @@ namespace Closures
             FunctionCall(Symbol("counter")),
             FunctionCall(Symbol("counter"))
         );
+        public static string CounterCode = @"
+          (define makeCounter
+                  (lambda ()
+                     (define x 0)
+                     (lambda ()
+                        (set! x (+ x 1))
+                        x)))
+           (define counter (makeCounter))
+           (counter)
+           (counter)
+        ";
     }
 }
