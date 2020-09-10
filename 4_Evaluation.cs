@@ -86,7 +86,8 @@ namespace Closures
                 Null n => n,
                 Bool b => b,
 
-                Assign a => EvalAssign(a),
+                SetVar a => EvalSetVar(a),
+                Define d => EvalDefine(d),
                 If i => EvalIf(i),
                 Sequence s => EvalSequence(s),
                 While w => EvalWhile(w),
@@ -100,10 +101,17 @@ namespace Closures
                 _ => throw new Exception($"Unknown type: {exp.GetType()}")
             };
 
-            Exp EvalAssign(Assign assign)
+            Exp EvalSetVar(SetVar setVar)
             {
-                var evaluatedValue = Eval(assign.Value, env);
-                env.Bind(assign.Variable, evaluatedValue);
+                var evaluatedValue = Eval(setVar.Value, env);
+                env.Bind(setVar.Variable, evaluatedValue);
+                return evaluatedValue;
+            }
+
+            Exp EvalDefine(Define define)
+            {
+                var evaluatedValue = Eval(define.Value, env);
+                env.Bind(define.Variable, evaluatedValue);
                 return evaluatedValue;
             }
 

@@ -16,7 +16,9 @@ namespace Closures
 
     public class CreateFunction: Exp { public List<string> Parameters; public Exp Body; }
 
-    public class Assign: Exp { public string Variable; public Exp Value; }
+    public class SetVar: Exp { public string Variable; public Exp Value; }
+
+    public class Define: Exp { public string Variable; public Exp Value; }
 
     public class FunctionCall: Exp { public Exp Function; public List<Exp> Arguments; }
 
@@ -48,7 +50,9 @@ namespace Closures
 
         public static Exp Function(List<string> parameters, Exp body) => new CreateFunction { Parameters = parameters, Body = body };
 
-        public static Exp Assign(string variable, Exp value) => new Assign { Variable = variable, Value = value };
+        public static Exp Define(string variable, Exp value) => new Define { Variable = variable, Value = value };
+
+        public static Exp SetVar(string variable, Exp value) => new SetVar { Variable = variable, Value = value };
 
         public static Exp FunctionCall(Exp function, params Exp[] arguments) => new FunctionCall {Function = function, Arguments = arguments.ToList()};
 
@@ -79,27 +83,27 @@ namespace Closures
         // }
         // loopSumTo(5); // 0 + 1 + 2 + 3 + 4 + 5 = 15
         public static string LoopSumToCode = @"
-          (assign loopSumTo 
-                  (function (x) 
-                     (assign sum 0)
+          (define loopSumTo 
+                  (lambda (x) 
+                     (define sum 0)
                      (while (> x 0)
-                        (assign sum (+ sum x))
-                        (assign x (- x 1)))
+                        (set! sum (+ sum x))
+                        (set! x (- x 1)))
                       sum))
           (loopSumTo 5)
         ";
         public static Exp LoopSumTo = Sequence(
-            Assign(
+            Define(
                 "loopSumTo", 
                 Function(
                     List("x"),
                     Sequence(
-                        Assign("sum", Number(0)),
+                        Define("sum", Number(0)),
                         While(
                             FunctionCall(Symbol(">"), Symbol("x"), Number(0)),
                             Sequence(
-                                Assign("sum", FunctionCall(Symbol("+"), Symbol("x"), Symbol("sum"))),
-                                Assign("x", FunctionCall(Symbol("-"), Symbol("x"), Number(1)))
+                                SetVar("sum", FunctionCall(Symbol("+"), Symbol("x"), Symbol("sum"))),
+                                SetVar("x", FunctionCall(Symbol("-"), Symbol("x"), Number(1)))
                             )
                         ),
                         Symbol("sum")
@@ -112,15 +116,15 @@ namespace Closures
         // let recSumTo = x => 1 > x ? 0 : x + recSumTo(x - 1);
         // recSumTo(5);
         public static string RecursiveSumToCode = @"
-          (assign recSumTo
-                  (function (x) 
+          (define recSumTo
+                  (lambda (x) 
                      (if (> 1 x) 
                          0 
                          (+ x (recSumTo (- x 1))))))
           (recSumTo 5)
         ";
         public static Exp RecursiveSumTo = Sequence(
-            Assign(
+            Define(
                 "recSumTo", 
                 Function(
                     List("x"),
@@ -146,34 +150,34 @@ namespace Closures
         // counter();
         // counter();
         public static string CounterCode = @"
-          (assign makeCounter
-                  (function ()
-                     (assign x 0)
-                     (function ()
-                        (assign x (+ x 1))
+          (define makeCounter
+                  (lambda ()
+                     (define x 0)
+                     (lambda ()
+                        (set! x (+ x 1))
                         x)))
-           (assign counter (makeCounter))
+           (define counter (makeCounter))
            (counter)
            (counter)
         ";
         public static Exp Counter = Sequence(
-            Assign(
+            Define(
                 "makeCounter",
                 Function(
                     List<string>(),
                     Sequence(
-                        Assign("x", Number(0)),
+                        Define("x", Number(0)),
                         Function(
                             List<string>(),
                             Sequence(
-                                Assign("x", FunctionCall(Symbol("+"), Symbol("x"), Number(1))),
+                                SetVar("x", FunctionCall(Symbol("+"), Symbol("x"), Number(1))),
                                 Symbol("x")
                             )
                         )
                     )
                 )
             ),
-            Assign("counter", FunctionCall(Symbol("makeCounter"))),
+            Define("counter", FunctionCall(Symbol("makeCounter"))),
             FunctionCall(Symbol("counter")),
             FunctionCall(Symbol("counter"))
         );

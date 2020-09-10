@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using static Closures.ExpHelpers;
 using Xunit;
 using FluentAssertions;
 using static Closures.Evaluator;
