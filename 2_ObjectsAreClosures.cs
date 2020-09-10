@@ -23,24 +23,24 @@ namespace Closures
             public List<string> GetCreditCards() => _creditCards;
         }
 
-        public Func<string, object[], object>  MakeBankAccount1()
+        public Func<string, Func<object[], object>>  MakeBankAccount1()
         {
             decimal balance = 0;
             var creditCards = new List<string>();
 
-            return (string method, object[] arguments) =>
+            return (string method) =>
                 method switch 
                 {
-                    "Withdraw" =>       DoAction(() => balance -= (int)arguments[0]),
-                    "Deposit" =>        DoAction(() => balance += (int)arguments[0]),
-                    "GetBalance" =>     balance,
-                    "AddCreditCard" =>  DoAction(() => creditCards.Add(arguments[0] as string)),
-                    "GetCreditCards" => creditCards,
+                    "Withdraw" =>       fun((object[] args) => balance -= (int)args[0]),
+                    "Deposit" =>        fun((object[] args) => balance += (int)args[0]),
+                    "GetBalance" =>     fun((object[] args) => balance),
+                    "AddCreditCard" =>  fun((object[] args) => {creditCards.Add(args[0] as string); return null;}),
+                    "GetCreditCards" => fun((object[] args) => creditCards),
 
                     _ => throw new Exception($"Unknown method: {method}")
                 };
-
-            object DoAction(Action action) { action(); return null; }
+            
+            Func<object[], object> fun(Func<object[], object> f) => f;
         }
 
         public Dictionary<string, Func<object[], object>>  MakeBankAccount2()
@@ -75,12 +75,12 @@ namespace Closures
             {
                 var account = MakeBankAccount1();
 
-                account("GetBalance", new object[] {}).Should().Be(0);
+                account("GetBalance")(new object[] {}).Should().Be(0);
 
-                account("Deposit", new object[] { 100 });
-                account("Withdraw", new object[] { 50 });
+                account("Deposit")(new object[] { 100 });
+                account("Withdraw")(new object[] { 50 });
 
-                account("GetBalance", new object[] {}).Should().Be(50);
+                account("GetBalance")(new object[] {}).Should().Be(50);
             }
 
             {
