@@ -79,17 +79,21 @@ namespace Closures
         public static Exp PrimitiveFunction(Func<List<Exp>, Exp> work) => new PrimitiveFunction { Work = work };
     }
 
+    // https://repl.it/languages/scheme
+    // https://repl.it/languages/javascript
     public static class ASTExamples
     {
-        // let loopSumTo = function(x) {
-        //    let sum = 0;
-        //    while (x > 0) {
-        //       sum = sum + x;
-        //       x = x - 1;
-        //    }
-        //    return sum;
-        // }
-        // loopSumTo(5); // 0 + 1 + 2 + 3 + 4 + 5 = 15
+        public static string LoopSumToCodeJS = @"
+        let loopSumTo = function(x) {
+           let sum = 0;
+           while (x > 0) {
+              sum = sum + x;
+              x = x - 1;
+           }
+           return sum;
+        }
+        loopSumTo(5); 
+        ";
         public static Exp LoopSumTo = Statements(
             Define(
                 "loopSumTo", 
@@ -110,7 +114,7 @@ namespace Closures
             ),
             FunctionCall(Symbol("loopSumTo"), Number(5))
         );
-        public static string LoopSumToCode = @"
+        public static string LoopSumToCodeScheme = @"
           (define loopSumTo 
                   (lambda (x) 
                      (define sum 0)
@@ -121,8 +125,10 @@ namespace Closures
           (loopSumTo 5)
         ";
 
-        // let recSumTo = x => 1 > x ? 0 : x + recSumTo(x - 1);
-        // recSumTo(5);
+        public static string RecursiveSumToCodeJS = @"
+         let recSumTo = x => 1 > x ? 0 : x + recSumTo(x - 1);
+         recSumTo(5);
+        ";
         public static Exp RecursiveSumTo = Statements(
             Define(
                 "recSumTo", 
@@ -144,7 +150,7 @@ namespace Closures
             ),
             FunctionCall(Symbol("recSumTo"), Number(5))
         );
-        public static string RecursiveSumToCode = @"
+        public static string RecursiveSumToCodeScheme = @"
           (define recSumTo
                   (lambda (x) 
                      (if (> 1 x) 
@@ -153,10 +159,12 @@ namespace Closures
           (recSumTo 5)
         ";
 
-        // let makeCounter = function() { let x = 0; return function() { x = x + 1; return x; }; }
-        // let counter = makeCounter();
-        // counter();
-        // counter();
+        public static string CounterCodeJS = @"
+         let makeCounter = function() { let x = 0; return function() { x = x + 1; return x; }; }
+         let counter = makeCounter();
+         counter();
+         counter();
+        ";
         public static Exp Counter = Statements(
             Define(
                 "makeCounter",
@@ -178,7 +186,7 @@ namespace Closures
             FunctionCall(Symbol("counter")),
             FunctionCall(Symbol("counter"))
         );
-        public static string CounterCode = @"
+        public static string CounterCodeScheme = @"
           (define makeCounter
                   (lambda ()
                      (define x 0)
@@ -190,7 +198,19 @@ namespace Closures
            (counter)
         ";
 
-        public static string ComplicatedCounterCode = @"
+        public static string ComplicatedCounterCodeJS = @"
+        let globalCount = 0;
+        let makeCounter = function() { let x = 0; return function() { x++; globalCount++; return x; }; }
+        let counter1 = makeCounter();
+        let counter2 = makeCounter();
+        counter1();
+        counter1();
+        let counter2Value = counter2();
+        let counter1Value = counter1();
+        [globalCount, counter1Value, counter2Value]
+        ";
+
+        public static string ComplicatedCounterCodeScheme = @"
         (define globalCount 0)
         (define makeCounter
                 (lambda ()
@@ -208,7 +228,33 @@ namespace Closures
         (list globalCount counter1Value counter2Value)
         ";
 
-        public static string BankAccountCode = @"
+        public static string BankAccountCodeJS = @"
+        let makeBankAccount = function() {
+            let balance = 0;
+            let withdraw = amt => balance -= amt;
+            let deposit = amt => balance += amt;
+            let getBalance = () => balance;
+            let unknownMethod  = () => null;
+
+            return method =>
+                // would use strings, but makes copy pasting into repl harder
+                method == 0 ? withdraw
+                : method == 1 ? deposit
+                : method == 2 ? getBalance
+                : unknownMethod;
+        }
+
+        let alice = makeBankAccount();
+        let bob = makeBankAccount();
+
+        alice(1)(100); // deposit 100
+        alice(0)(50);  // withdraw 50
+        bob(1)(200);  // deposit 200
+
+        [alice(2)(), bob(2)()] // get balances
+        ";
+
+        public static string BankAccountCodeScheme = @"
         (define makeBankAccount
             (lambda ()
                 (define balance 0)
