@@ -13,12 +13,17 @@ namespace Closures
     public static class Parser 
     {
         public static Exp AsSeq(Exp[] exps) =>
-            exps.Length == 1 ? exps[0] : Sequence(exps);
+            exps.Length == 1 ? exps[0] : Statements(exps);
 
         public static Parser<string> Identifier = asString(many1(noneOf(" ()\r\n")));
 
         public static Parser<Exp> ParseNumber =
             from n in asString(many1(digit)) select Number(Int32.Parse(n));
+
+        public static Parser<Exp> ParseString = 
+            from _ in ch('\'')
+            from content in Identifier
+            select String(content);
 
         public static Parser<Exp> ParseSymbol =
             from s in Identifier select Symbol(s);
@@ -77,6 +82,7 @@ namespace Closures
         public static Parser<Exp> ParseExp = 
             from result in between(spaces, spaces, choice(
                 attempt(ParseNumber),
+                attempt(ParseString),
                 attempt(ParseSymbol),
                 ParseSpecialFormOrFnApplication
             ))

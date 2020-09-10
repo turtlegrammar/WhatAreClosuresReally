@@ -11,12 +11,12 @@ namespace Closures
 
         private readonly ImmutableList<Dictionary<string, Exp>> _scopes;
 
-        public Environment(Dictionary<string, Exp> globalScope)
+        private Environment(Dictionary<string, Exp> globalScope)
         {
             _scopes = new List<Dictionary<string, Exp>> { globalScope }.ToImmutableList();
         }
 
-        public Environment(ImmutableList<Dictionary<string, Exp>> scopes)
+        private Environment(ImmutableList<Dictionary<string, Exp>> scopes)
         {
             _scopes = scopes;
         }
@@ -57,12 +57,6 @@ namespace Closures
             return new Environment(_scopes.Add(bindings.ToDictionary(tup => tup.varName, tup => tup.value)));
         }
 
-        ///
-        ///
-        ///
-
-        public static Environment Empty = new Environment(new List<Dictionary<string, Exp>>().ToImmutableList());
-
         public static Environment InitialEnvironment() =>
             new Environment(
                 new Dictionary<string, Exp>
@@ -70,6 +64,8 @@ namespace Closures
                     {"+", PrimitiveFunction(args => Number( (args[0] as Number).Value + (args[1] as Number).Value))},
                     {"-", PrimitiveFunction(args => Number( (args[0] as Number).Value - (args[1] as Number).Value))},
                     {">", PrimitiveFunction(args => Bool( (args[0] as Number).Value > (args[1] as Number).Value))},
+                    {"list", PrimitiveFunction(args => ListExp(args.ToArray()))},
+                    {"eq?", PrimitiveFunction(args => Bool((args[0] as StringExp).Value == (args[1] as StringExp).Value))}
                 }
             );
     }
@@ -85,11 +81,12 @@ namespace Closures
                 Symbol s => env.ValueOf(s.Value),
                 Null n => n,
                 Bool b => b,
+                StringExp s => s,
 
                 SetVar a => EvalSetVar(a),
                 Define d => EvalDefine(d),
                 If i => EvalIf(i),
-                Sequence s => EvalSequence(s),
+                Statements s => EvalSequence(s),
                 While w => EvalWhile(w),
 
                 CreateFunction cf => new FunctionObject { Parameters = cf.Parameters, Body = cf.Body, Environment = env },
@@ -123,7 +120,7 @@ namespace Closures
                     : Eval(ifExp.FalseBranch, env);
             }
 
-            Exp EvalSequence(Sequence sequence)
+            Exp EvalSequence(Statements sequence)
             {
                 Exp resultExp = ExpHelpers.Void; 
                 foreach (var exp in sequence.Expressions)

@@ -14,6 +14,8 @@ namespace Closures
 
     public class Bool: Exp { public bool Value; }
 
+    public class StringExp: Exp { public string Value; }
+
     public class CreateFunction: Exp { public List<string> Parameters; public Exp Body; }
 
     public class SetVar: Exp { public string Variable; public Exp Value; }
@@ -24,9 +26,11 @@ namespace Closures
 
     public class If: Exp { public Exp Condition; public Exp TrueBranch; public Exp FalseBranch; }
 
-    public class Sequence: Exp { public List<Exp> Expressions; }
+    public class Statements: Exp { public List<Exp> Expressions; }
 
     public class While: Exp { public Exp Condition; public Exp LoopBody; }
+
+    public class ListExp: Exp { public List<Exp> Members; }
 
 
     // Internal
@@ -48,6 +52,8 @@ namespace Closures
 
         public static Exp Bool(bool b) => new Bool { Value = b };
 
+        public static Exp String(string s) => new StringExp { Value = s};
+
         public static Exp Function(List<string> parameters, Exp body) => new CreateFunction { Parameters = parameters, Body = body };
 
         public static Exp Define(string variable, Exp value) => new Define { Variable = variable, Value = value };
@@ -58,9 +64,11 @@ namespace Closures
 
         public static Exp If(Exp condition, Exp trueBranch, Exp falseBranch) => new If { Condition = condition, TrueBranch = trueBranch, FalseBranch = falseBranch };
 
-        public static Exp Sequence(params Exp[] exps) => new Sequence { Expressions = exps.ToList() };
+        public static Exp Statements(params Exp[] exps) => new Statements { Expressions = exps.ToList() };
 
         public static Exp While(Exp condition, Exp body) => new While { Condition = condition, LoopBody = body };
+
+        public static Exp ListExp(params Exp[] members) => new ListExp { Members = members.ToList() };
 
         public static Exp Void = new Null();
 
@@ -82,16 +90,16 @@ namespace Closures
         //    return sum;
         // }
         // loopSumTo(5); // 0 + 1 + 2 + 3 + 4 + 5 = 15
-        public static Exp LoopSumTo = Sequence(
+        public static Exp LoopSumTo = Statements(
             Define(
                 "loopSumTo", 
                 Function(
                     List("x"),
-                    Sequence(
+                    Statements(
                         Define("sum", Number(0)),
                         While(
                             FunctionCall(Symbol(">"), Symbol("x"), Number(0)),
-                            Sequence(
+                            Statements(
                                 SetVar("sum", FunctionCall(Symbol("+"), Symbol("x"), Symbol("sum"))),
                                 SetVar("x", FunctionCall(Symbol("-"), Symbol("x"), Number(1)))
                             )
@@ -115,7 +123,7 @@ namespace Closures
 
         // let recSumTo = x => 1 > x ? 0 : x + recSumTo(x - 1);
         // recSumTo(5);
-        public static Exp RecursiveSumTo = Sequence(
+        public static Exp RecursiveSumTo = Statements(
             Define(
                 "recSumTo", 
                 Function(
@@ -149,16 +157,16 @@ namespace Closures
         // let counter = makeCounter();
         // counter();
         // counter();
-        public static Exp Counter = Sequence(
+        public static Exp Counter = Statements(
             Define(
                 "makeCounter",
                 Function(
                     List<string>(),
-                    Sequence(
+                    Statements(
                         Define("x", Number(0)),
                         Function(
                             List<string>(),
-                            Sequence(
+                            Statements(
                                 SetVar("x", FunctionCall(Symbol("+"), Symbol("x"), Number(1))),
                                 Symbol("x")
                             )
@@ -180,6 +188,49 @@ namespace Closures
            (define counter (makeCounter))
            (counter)
            (counter)
+        ";
+
+        public static string ComplicatedCounterCode = @"
+        (define globalCount 0)
+        (define makeCounter
+                (lambda ()
+                   (define x 0)
+                   (lambda ()
+                      (set! x (+ x 1))
+                      (set! globalCount (+ globalCount 1))
+                      x)))
+        (define counter1 (makeCounter))
+        (define counter2 (makeCounter))
+        (counter1)
+        (counter1)
+        (define counter2Value (counter2))
+        (define counter1Value (counter1))
+        (list globalCount counter1Value counter2Value)
+        ";
+
+        public static string BankAccountCode = @"
+        (define makeBankAccount
+            (lambda ()
+                (define balance 0)
+                (define withdraw (lambda (amt) (set! balance (- balance amt))))
+                (define deposit (lambda (amt) (set! balance (+ balance amt))))
+                (define getBalance (lambda () balance))
+                (define unknownMethod (lambda () 'ShouldThrowException))
+
+                (lambda (method)
+                  (if (eq? method 'withdraw)   withdraw
+                  (if (eq? method 'deposit)    deposit
+                  (if (eq? method 'getBalance) getBalance 
+                      unknownMethod))))))
+
+        (define alice (makeBankAccount))
+        (define bob (makeBankAccount))
+
+        ((alice 'deposit) 100)
+        ((alice 'withdraw) 50)
+        ((bob 'deposit) 200)
+
+        (list ((alice 'getBalance)) ((bob 'getBalance)))
         ";
     }
 }

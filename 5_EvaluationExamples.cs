@@ -1,6 +1,7 @@
 using Xunit;
 using FluentAssertions;
 using static Closures.Evaluator;
+using static Closures.ExpHelpers;
 
 namespace Closures
 {
@@ -17,8 +18,8 @@ namespace Closures
             var resultFromAST = Eval(ASTExamples.LoopSumTo, env);
             var resultFromParsed = Eval(parsed, env);
 
-            (resultFromAST as Number).Value.Should().Be(15);
-            (resultFromParsed as Number).Value.Should().Be(15);
+            resultFromAST.Should().BeEquivalentTo(Number(15), options => options.RespectingRuntimeTypes());
+            resultFromParsed.Should().BeEquivalentTo(Number(15), options => options.RespectingRuntimeTypes());
         }
 
         [Fact]
@@ -32,8 +33,8 @@ namespace Closures
             var resultFromAST = Eval(ASTExamples.RecursiveSumTo, env);
             var resultFromParsed = Eval(parsed, env);
 
-            (resultFromAST as Number).Value.Should().Be(15);
-            (resultFromParsed as Number).Value.Should().Be(15);
+            resultFromAST.Should().BeEquivalentTo(Number(15), options => options.RespectingRuntimeTypes());
+            resultFromParsed.Should().BeEquivalentTo(Number(15), options => options.RespectingRuntimeTypes());
         }
 
         [Fact]
@@ -47,8 +48,38 @@ namespace Closures
             var resultFromAST = Eval(ASTExamples.Counter, env);
             var resultFromParsed = Eval(parsed, env);
 
-            (resultFromAST as Number).Value.Should().Be(2);
-            (resultFromParsed as Number).Value.Should().Be(2);
+            resultFromAST.Should().BeEquivalentTo(Number(2), options => options.RespectingRuntimeTypes());
+            resultFromParsed.Should().BeEquivalentTo(Number(2), options => options.RespectingRuntimeTypes());
+        }
+
+        [Fact]
+        public void ComplicatedCounterExample()
+        {
+            var env =  Environment.InitialEnvironment();
+
+            var parsed = Parser.Parse(ASTExamples.ComplicatedCounterCode);
+
+            var result = Eval(parsed, env);
+
+            result.Should().BeEquivalentTo(
+                ListExp(Number(4), Number(3), Number(1)),
+                options => options.RespectingRuntimeTypes()
+            );
+        }
+
+        [Fact]
+        public void BankAccountExample()
+        {
+            var env =  Environment.InitialEnvironment();
+
+            var parsed = Parser.Parse(ASTExamples.BankAccountCode);
+
+            var result = Eval(parsed, env);
+
+            result.Should().BeEquivalentTo(
+                ListExp(Number(50), Number(200)),
+                options => options.RespectingRuntimeTypes()
+            );
         }
     }
 }
