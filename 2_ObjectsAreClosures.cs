@@ -31,16 +31,17 @@ namespace Closures
             return (string method) =>
                 method switch 
                 {
-                    "Withdraw" =>       fun((object[] args) => balance -= (int)args[0]),
-                    "Deposit" =>        fun((object[] args) => balance += (int)args[0]),
-                    "GetBalance" =>     fun((object[] args) => balance),
-                    "AddCreditCard" =>  fun((object[] args) => {creditCards.Add(args[0] as string); return null;}),
-                    "GetCreditCards" => fun((object[] args) => creditCards),
+                    "Withdraw" =>       fun(args => balance -= (int)args[0]),
+                    "Deposit" =>        fun(args => balance += (int)args[0]),
+                    "GetBalance" =>     fun(args => balance),
+                    "AddCreditCard" =>  act(args => creditCards.Add(args[0] as string)),
+                    "GetCreditCards" => fun(args => creditCards),
 
                     _ => throw new Exception($"Unknown method: {method}")
                 };
             
             Func<object[], object> fun(Func<object[], object> f) => f;
+            Func<object[], object> act(Action<object[]> f) => args => { f(args); return null;};
         }
 
         public Dictionary<string, Func<object[], object>>  MakeBankAccount2()
