@@ -10,7 +10,7 @@ namespace Closures
 
     public class Number: Exp { public long Value; }
 
-    public class Symbol: Exp { public string Value; }
+    public class Variable: Exp { public string VarName; }
 
     public class Bool: Exp { public bool Value; }
 
@@ -48,7 +48,7 @@ namespace Closures
     {
         public static Exp Number(long n) => new Number { Value = n };
 
-        public static Exp Symbol(string s) => new Symbol{ Value = s };
+        public static Exp Variable(string s) => new Variable{ VarName = s };
 
         public static Exp Bool(bool b) => new Bool { Value = b };
 
@@ -90,11 +90,11 @@ namespace Closures
         );
 
         public static string LetXEqual5Plus3JS = @"
-            let x = 5 + 3;
+            let x = 5 + 3; 
         ";
         public static Exp LetXEqual5Plus3 = Define(
             "x",
-            FunctionCall(Symbol("+"), Number(5), Number(3))
+            FunctionCall(Variable("+"), Number(5), Number(3))
         );
 
         public static string MaxJS = @"
@@ -111,12 +111,12 @@ namespace Closures
                 Function(
                     List("x", "y"),
                     If(
-                        FunctionCall(Symbol(">"), Symbol("x"), Symbol("y")),
-                        Symbol("x"),
-                        Symbol("y")
+                        FunctionCall(Variable(">"), Variable("x"), Variable("y")),
+                        Variable("x"),
+                        Variable("y")
                     ))
             ),
-            FunctionCall(Symbol("max"), Number(5), Number(6))
+            FunctionCall(Variable("max"), Number(5), Number(6))
         );
 
         public static string ContrivedFunctionCallJS = @"
@@ -127,12 +127,12 @@ namespace Closures
             Function(
                 List("x", "y"),
                 FunctionCall(
-                    Symbol("+"),
-                    Symbol("x"),
+                    Variable("+"),
+                    Variable("x"),
                     FunctionCall(
-                        Symbol("+"),
-                        Symbol("y"), 
-                        Symbol("y")
+                        Variable("+"),
+                        Variable("y"), 
+                        Variable("y")
                     )
                 )
             ),
@@ -165,17 +165,17 @@ namespace Closures
                     Statements(
                         Define("sum", Number(0)),
                         While(
-                            FunctionCall(Symbol(">"), Symbol("x"), Number(0)),
+                            FunctionCall(Variable(">"), Variable("x"), Number(0)),
                             Statements(
-                                SetVar("sum", FunctionCall(Symbol("+"), Symbol("x"), Symbol("sum"))),
-                                SetVar("x", FunctionCall(Symbol("-"), Symbol("x"), Number(1)))
+                                SetVar("sum", FunctionCall(Variable("+"), Variable("x"), Variable("sum"))),
+                                SetVar("x", FunctionCall(Variable("-"), Variable("x"), Number(1)))
                             )
                         ),
-                        Symbol("sum")
+                        Variable("sum")
                     )
                 )
             ),
-            FunctionCall(Symbol("loopSumTo"), Number(5))
+            FunctionCall(Variable("loopSumTo"), Number(5))
         );
 
         public static string LoopSumToCodeScheme = @"
@@ -200,20 +200,20 @@ namespace Closures
                 Function(
                     List("x"),
                     If(
-                        FunctionCall(Symbol(">"), Number(1), Symbol("x")),
+                        FunctionCall(Variable(">"), Number(1), Variable("x")),
                         Number(0),
                         FunctionCall(
-                            Symbol("+"),
-                            Symbol("x"),
+                            Variable("+"),
+                            Variable("x"),
                             FunctionCall(
-                                Symbol("recSumTo"),
-                                FunctionCall(Symbol("-"), Symbol("x"), Number(1))
+                                Variable("recSumTo"),
+                                FunctionCall(Variable("-"), Variable("x"), Number(1))
                             )
                         )
                     )
                 )
             ),
-            FunctionCall(Symbol("recSumTo"), Number(5))
+            FunctionCall(Variable("recSumTo"), Number(5))
         );
 
         public static string RecursiveSumToCodeScheme = @"
@@ -242,16 +242,16 @@ namespace Closures
                         Function(
                             List<string>(),
                             Statements(
-                                SetVar("x", FunctionCall(Symbol("+"), Symbol("x"), Number(1))),
-                                Symbol("x")
+                                SetVar("x", FunctionCall(Variable("+"), Variable("x"), Number(1))),
+                                Variable("x")
                             )
                         )
                     )
                 )
             ),
-            Define("counter", FunctionCall(Symbol("makeCounter"))),
-            FunctionCall(Symbol("counter")),
-            FunctionCall(Symbol("counter"))
+            Define("counter", FunctionCall(Variable("makeCounter"))),
+            FunctionCall(Variable("counter")),
+            FunctionCall(Variable("counter"))
         );
 
         public static string CounterCodeScheme = @"

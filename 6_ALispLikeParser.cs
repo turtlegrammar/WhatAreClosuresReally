@@ -26,7 +26,7 @@ namespace Closures
             select String(content);
 
         public static Parser<Exp> ParseSymbol =
-            from s in Identifier select Symbol(s);
+            from s in Identifier select Variable(s);
 
         public static Parser<List<string>> ParseArgsList =
             from open in ch('(')

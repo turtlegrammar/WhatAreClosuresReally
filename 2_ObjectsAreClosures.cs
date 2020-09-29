@@ -76,6 +76,8 @@ namespace Closures
             {
                 var account = MakeBankAccount1();
 
+                // var getBalance = account("GetBalance");
+
                 account("GetBalance")(new object[] {}).Should().Be(0);
 
                 account("Deposit")(new object[] { 100 });
@@ -86,6 +88,9 @@ namespace Closures
 
             {
                 var account = MakeBankAccount2();
+
+                // var getBalance = account["GetBalance"];
+                // getBalance(new object [] {});
 
                 account["GetBalance"](new object[] {}).Should().Be(0);
 

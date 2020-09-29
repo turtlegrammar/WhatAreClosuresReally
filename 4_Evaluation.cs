@@ -82,7 +82,7 @@ namespace Closures
                 Bool b => b,
                 StringExp s => s,
 
-                Symbol s => env.ValueOf(s.Value),
+                Variable s => env.ValueOf(s.VarName),
                 SetVar a => EvalSetVar(a),
                 Define d => EvalDefine(d),
 
