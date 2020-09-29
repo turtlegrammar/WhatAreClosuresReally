@@ -79,6 +79,68 @@ namespace Closures
         public static Exp PrimitiveFunction(Func<List<Exp>, Exp> work) => new PrimitiveFunction { Work = work };
     }
 
+    public static class SmallASTExamples
+    {
+        public static string LetXEqual5JS = @"
+            let x = 5;
+        ";
+        public static Exp LetXEqual5 = Define(
+            "x",
+            Number(5)
+        );
+
+        public static string LetXEqual5Plus3JS = @"
+            let x = 5 + 3;
+        ";
+        public static Exp LetXEqual5Plus3 = Define(
+            "x",
+            FunctionCall(Symbol("+"), Number(5), Number(3))
+        );
+
+        public static string MaxJS = @"
+            let max = function(x, y) {
+                return x > y ? x : y;
+            };
+
+            max(5, 6);
+        ";
+
+        public static Exp Max = Statements(
+            Define(
+                "max",
+                Function(
+                    List("x", "y"),
+                    If(
+                        FunctionCall(Symbol(">"), Symbol("x"), Symbol("y")),
+                        Symbol("x"),
+                        Symbol("y")
+                    ))
+            ),
+            FunctionCall(Symbol("max"), Number(5), Number(6))
+        );
+
+        public static string ContrivedFunctionCallJS = @"
+            function(x, y) { x + y + y }(5, 4); // equals 5 + 4 + 4 = 13
+        ";
+
+        public static Exp ContrivedFunctionCall = FunctionCall(
+            Function(
+                List("x", "y"),
+                FunctionCall(
+                    Symbol("+"),
+                    Symbol("x"),
+                    FunctionCall(
+                        Symbol("+"),
+                        Symbol("y"), 
+                        Symbol("y")
+                    )
+                )
+            ),
+            Number(5), 
+            Number(4)
+        );
+    }
+
     // https://repl.it/languages/scheme
     // https://repl.it/languages/javascript
     public static class ASTExamples
@@ -94,6 +156,7 @@ namespace Closures
         }
         loopSumTo(5); 
         ";
+
         public static Exp LoopSumTo = Statements(
             Define(
                 "loopSumTo", 
@@ -114,6 +177,7 @@ namespace Closures
             ),
             FunctionCall(Symbol("loopSumTo"), Number(5))
         );
+
         public static string LoopSumToCodeScheme = @"
           (define loopSumTo 
                   (lambda (x) 
@@ -129,6 +193,7 @@ namespace Closures
          let recSumTo = x => 1 > x ? 0 : x + recSumTo(x - 1);
          recSumTo(5);
         ";
+
         public static Exp RecursiveSumTo = Statements(
             Define(
                 "recSumTo", 
@@ -150,6 +215,7 @@ namespace Closures
             ),
             FunctionCall(Symbol("recSumTo"), Number(5))
         );
+
         public static string RecursiveSumToCodeScheme = @"
           (define recSumTo
                   (lambda (x) 
@@ -165,6 +231,7 @@ namespace Closures
          counter();
          counter();
         ";
+
         public static Exp Counter = Statements(
             Define(
                 "makeCounter",
@@ -186,6 +253,7 @@ namespace Closures
             FunctionCall(Symbol("counter")),
             FunctionCall(Symbol("counter"))
         );
+
         public static string CounterCodeScheme = @"
           (define makeCounter
                   (lambda ()
@@ -238,20 +306,20 @@ namespace Closures
 
             return method =>
                 // would use strings, but makes copy pasting into repl harder
-                method == 0 ? withdraw
-                : method == 1 ? deposit
-                : method == 2 ? getBalance
+                method == 'w' ? withdraw
+                : method == 'd' ? deposit
+                : method == 'b' ? getBalance
                 : unknownMethod;
         }
 
         let alice = makeBankAccount();
         let bob = makeBankAccount();
 
-        alice(1)(100); // deposit 100
-        alice(0)(50);  // withdraw 50
-        bob(1)(200);  // deposit 200
+        alice('d')(100); // deposit 100
+        alice('w')(50);  // withdraw 50
+        bob('d')(200);  // deposit 200
 
-        [alice(2)(), bob(2)()] // get balances
+        [alice('b')(), bob('b')()] // get balances
         ";
 
         public static string BankAccountCodeScheme = @"

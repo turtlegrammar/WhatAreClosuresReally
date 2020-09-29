@@ -78,13 +78,14 @@ namespace Closures
             return exp switch
             {
                 Number n => n,
-                Symbol s => env.ValueOf(s.Value),
                 Null n => n,
                 Bool b => b,
                 StringExp s => s,
 
+                Symbol s => env.ValueOf(s.Value),
                 SetVar a => EvalSetVar(a),
                 Define d => EvalDefine(d),
+
                 If i => EvalIf(i),
                 Statements s => EvalSequence(s),
                 While w => EvalWhile(w),
