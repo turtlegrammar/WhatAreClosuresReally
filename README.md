@@ -7,4 +7,6 @@ Then, I show the equivalence between objects and closures. Any closure can be im
 (the variables that the closure captures are passed into the object's constructor) and any object can be implemented as a closure
 (methods are replaced by a single dispatch method and dynamic parameters).
 
-Finally, I implement closures by writing an interpreter for Scheme, a simple language in the LISP family.
+Finally, I implement closures by writing an interpreter for Scheme, a simple language in the LISP family. 
+
+This was written before dotnet 5 and C# 9 were available. It would have been much cleaner with C# 9's record types.
